@@ -386,3 +386,122 @@ section.revealed { opacity:1; transform:translateY(0); }
   border-radius:999px; border:1px solid rgba(188,140,255,0.3);
   color:var(--purple);
 }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width:900px) {
+  .contact-cards { grid-template-columns:1fr; }
+}
+
+@media (max-width:760px) {
+  .container { padding:0 16px 92px; }
+  .nav-inner { padding:0 16px; }
+  .nav-logo { font-size:13px; gap:4px; }
+  .nav-links { gap:4px; }
+  .nav-links a { font-size:12px; padding:6px 9px; }
+
+  .hero {
+    padding:calc(var(--nav-h) + 56px) 0 52px;
+  }
+  .hero::before {
+    width:520px;
+    height:420px;
+  }
+  .hero-avatar {
+    width:64px;
+    height:64px;
+    font-size:32px;
+    border-radius:18px;
+    margin-bottom:20px;
+  }
+  .hero-name {
+    font-size:clamp(32px, 11vw, 42px);
+    margin-bottom:10px;
+  }
+  .hero-role {
+    font-size:13px;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .hero-role .dot { display:none; }
+  .hero-desc {
+    font-size:15px;
+    line-height:1.6;
+    margin:0 auto 22px;
+  }
+  .hero-tags {
+    gap:8px;
+    margin-bottom:24px;
+  }
+  .hero-tags .tag {
+    font-size:11px;
+    padding:3px 10px;
+  }
+  .hero-btns {
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    max-width:280px;
+    margin:0 auto;
+  }
+  .btn {
+    justify-content:center;
+    width:100%;
+    padding:10px 14px;
+  }
+
+  section { margin-top:58px; }
+  .section-title {
+    font-size:24px;
+    gap:10px;
+  }
+  .section-title .num {
+    min-width:32px;
+    height:32px;
+    font-size:13px;
+    border-radius:10px;
+  }
+  .section-sub {
+    padding-left:0;
+    margin-bottom:24px;
+    font-size:14px;
+  }
+
+  .glass,
+  .project-card,
+  .contact-card,
+  .future-note {
+    padding:18px;
+  }
+
+  .project-name { font-size:14px; }
+  .project-desc { font-size:13px; }
+  .project-link { font-size:12px; }
+
+  .contact-card { gap:10px; }
+  .contact-value {
+    font-size:13px;
+    word-break:break-word;
+    text-align:center;
+  }
+
+  .future-note h3 { font-size:16px; }
+  .future-note p { font-size:13px; }
+  .future-tags { gap:6px; }
+  .future-tags span { font-size:10px; }
+
+  .footer {
+    font-size:12px;
+    padding:28px 16px;
+  }
+}
+
+@media (max-width:520px) {
+  .nav-links a:not(.nav-cta) { display:none; }
+  .nav-links .nav-cta {
+    margin-left:0;
+    padding:6px 10px;
+  }
+}
