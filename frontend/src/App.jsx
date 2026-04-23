@@ -7,6 +7,7 @@ import Projects      from './components/Projects'
 import Contact       from './components/Contact'
 import ArticlesList  from './components/ArticlesList'
 import ArticlePage   from './components/ArticlePage'
+import AdminPage     from './components/AdminPage'
 
 // ── Главная страница ──────────────────────────────────────────
 function HomePage() {
@@ -70,6 +71,7 @@ function AppInner() {
           <Route path="/articles/:slug" element={
             <div className="container"><ArticlePage /></div>
           } />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </div>
       <footer className="footer">

@@ -782,3 +782,120 @@ section.revealed { opacity:1; transform:translateY(0); }
     padding:6px 10px;
   }
 }
+
+/* ══ ADMIN ══ */
+.admin-login {
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.admin-login__box {
+  width:100%; max-width:380px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:36px 32px;
+}
+.admin-login__title {
+  font-size:22px; font-weight:700; color:var(--white);
+  margin-bottom:24px; font-family:var(--mono);
+  letter-spacing:0.05em;
+}
+.admin-login__form {
+  display:flex; flex-direction:column; gap:12px;
+}
+.admin-input {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:10px 14px;
+  color:var(--text); font-family:var(--sans); font-size:14px;
+  width:100%; outline:none; transition:border-color 0.2s;
+}
+.admin-input:focus { border-color:rgba(0,229,255,0.4); }
+.admin-input::placeholder { color:var(--text2); }
+.admin-textarea { resize:vertical; font-family:var(--mono); font-size:13px; }
+select.admin-input { cursor:pointer; }
+.admin-error {
+  font-size:13px; color:#ff6b6b;
+  background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.25);
+  border-radius:var(--radius-sm); padding:8px 12px;
+}
+.admin-panel {
+  padding:calc(var(--nav-h) + 32px) 0 60px;
+  max-width:900px; margin:0 auto; padding-left:24px; padding-right:24px;
+}
+.admin-panel__header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:28px;
+}
+.admin-panel__title {
+  font-size:20px; font-weight:700; color:var(--white);
+  font-family:var(--mono); letter-spacing:0.04em;
+}
+.admin-panel__toolbar { margin-bottom:18px; }
+.admin-section-title {
+  font-size:16px; font-weight:600; color:var(--white);
+  margin-bottom:18px;
+}
+.admin-table {
+  width:100%; border-collapse:collapse;
+  font-size:14px;
+}
+.admin-table th {
+  text-align:left; color:var(--text2);
+  font-size:11px; font-weight:600; text-transform:uppercase;
+  letter-spacing:0.08em; padding:8px 12px;
+  border-bottom:1px solid var(--border);
+}
+.admin-table td {
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  color:var(--text);
+}
+.admin-table tr:hover td { background:var(--bg2); }
+.admin-table__mono { font-family:var(--mono); font-size:13px; color:var(--text2); }
+.admin-table__actions { display:flex; gap:6px; justify-content:flex-end; }
+.admin-badge {
+  display:inline-block; font-size:11px; font-weight:600;
+  padding:2px 8px; border-radius:999px; font-family:var(--mono);
+  text-transform:uppercase; letter-spacing:0.06em;
+}
+.admin-badge--cyan   { background:var(--cyan-dim);   color:var(--cyan); }
+.admin-badge--purple { background:var(--purple-dim); color:var(--purple); }
+.admin-badge--orange { background:rgba(255,165,0,0.12); color:orange; }
+.admin-badge--green  { background:rgba(0,200,100,0.12); color:#00c864; }
+.admin-article-form {
+  display:flex; flex-direction:column; gap:14px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:28px;
+}
+.admin-form-row {
+  display:flex; flex-direction:column; gap:6px;
+}
+.admin-form-row label {
+  font-size:12px; font-weight:600; color:var(--text2);
+  text-transform:uppercase; letter-spacing:0.06em;
+}
+.admin-form-row--check { flex-direction:row; align-items:center; }
+.admin-form-row--check label {
+  display:flex; align-items:center; gap:8px;
+  cursor:pointer; text-transform:none; letter-spacing:0;
+  color:var(--text); font-size:14px; font-weight:400;
+}
+.admin-form-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+}
+.admin-form-actions {
+  display:flex; gap:10px; padding-top:4px;
+}
+.admin-status { color:var(--text2); font-size:14px; padding:20px 0; }
+.btn-danger {
+  color:#ff6b6b; border-color:rgba(255,107,107,0.3);
+}
+.btn-danger:hover {
+  background:rgba(255,107,107,0.1); border-color:rgba(255,107,107,0.6);
+}
+.btn--sm { padding:5px 12px; font-size:12px; }
+.btn-ghost {
+  background:transparent; border:1px solid var(--border);
+  color:var(--text2);
+}
+.btn-ghost:hover { border-color:var(--border-h); color:var(--white); }
+
