@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const location = useLocation()
+  const isHome   = location.pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -9,18 +12,31 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Якорные ссылки работают только на главной
+  function homeAnchor(anchor) {
+    return isHome ? anchor : `/${anchor}`
+  }
+
   return (
     <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
       <div className="nav-inner">
-        <a className="nav-logo" href="#hero">
+        <Link className="nav-logo" to="/">
           <span className="logo-bracket">&lt;</span>
           gopherchan2006
           <span className="logo-bracket">/&gt;</span>
-        </a>
+        </Link>
         <div className="nav-links">
-          <a href="#about">About</a>
-          <a href="#projects">Projects</a>
-          <a href="#contact" className="nav-cta">Contact</a>
+          <a href={homeAnchor('#about')}>About</a>
+          <a href={homeAnchor('#projects')}>Projects</a>
+          <NavLink
+            to="/articles"
+            className={({ isActive }) =>
+              isActive ? 'nav-articles nav-articles--active' : 'nav-articles'
+            }
+          >
+            Articles
+          </NavLink>
+          <a href={homeAnchor('#contact')} className="nav-cta">Contact</a>
         </div>
       </div>
     </nav>
