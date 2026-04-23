@@ -3,5 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/portfolio/', // замени на имя своего репозитория на GitHub
+  base: '/portfolio/',
+  server: {
+    host: true,
+    port: 5173,
+  },
 })
