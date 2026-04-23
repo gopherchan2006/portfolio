@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { fetchArticle } from '../api'
+import { fetchArticle, fetchComments, postComment, postReply } from '../api'
 
 // ── Рендер блоков контента ─────────────────────────────────────
 function ContentBlock({ block }) {
@@ -21,7 +21,12 @@ function ContentBlock({ block }) {
   }
 }
 
-// ── Одиночный комментарий ──────────────────────────────────────
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
+
 function Comment({ comment, onReply }) {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyText, setReplyText]         = useState('')
@@ -42,12 +47,12 @@ function Comment({ comment, onReply }) {
   return (
     <div className="comment">
       <div className="comment__avatar">
-        {comment.name.charAt(0).toUpperCase()}
+        {comment.author.charAt(0).toUpperCase()}
       </div>
       <div className="comment__body">
         <div className="comment__header">
-          <span className="comment__name">{comment.name}</span>
-          <span className="comment__date">{comment.date}</span>
+          <span className="comment__name">{comment.author}</span>
+          <span className="comment__date">{formatDate(comment.createdAt)}</span>
         </div>
         <p className="comment__text">{comment.text}</p>
         <button
@@ -57,18 +62,17 @@ function Comment({ comment, onReply }) {
           {showReplyForm ? 'Cancel' : '↩ Reply'}
         </button>
 
-        {/* Ответы */}
         {comment.replies?.length > 0 && (
           <div className="comment__replies">
             {comment.replies.map(r => (
               <div key={r.id} className="comment comment--reply">
                 <div className="comment__avatar comment__avatar--sm">
-                  {r.name.charAt(0).toUpperCase()}
+                  {r.author.charAt(0).toUpperCase()}
                 </div>
                 <div className="comment__body">
                   <div className="comment__header">
-                    <span className="comment__name">{r.name}</span>
-                    <span className="comment__date">{r.date}</span>
+                    <span className="comment__name">{r.author}</span>
+                    <span className="comment__date">{formatDate(r.createdAt)}</span>
                   </div>
                   <p className="comment__text">{r.text}</p>
                 </div>
@@ -77,7 +81,6 @@ function Comment({ comment, onReply }) {
           </div>
         )}
 
-        {/* Форма ответа */}
         {showReplyForm && (
           <form className="comment-form comment-form--reply" onSubmit={submitReply}>
             <input
@@ -106,92 +109,39 @@ function Comment({ comment, onReply }) {
   )
 }
 
-// ── Секция комментариев ────────────────────────────────────────
-const SEED_COMMENTS = {
-  'go-concurrency-patterns': [
-    {
-      id: 1,
-      name: 'Michael',
-      date: 'April 16, 2026',
-      text: 'Great article! The goroutine leak section is especially useful — I hit that exact issue in production.',
-      replies: [
-        {
-          id: 101,
-          name: 'gopherchan2006',
-          date: 'April 16, 2026',
-          text: 'Yeah, it\'s a classic trap. Also worth checking out pprof — it gives you a live view of all running goroutines.',
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Anna',
-      date: 'April 18, 2026',
-      text: 'Could you write about sync.Pool next? Really curious how it works under the hood.',
-      replies: [],
-    },
-  ],
-  'postgres-indexing-guide': [
-    {
-      id: 1,
-      name: 'Dmitry',
-      date: 'April 3, 2026',
-      text: 'The partial index tip is gold. Never thought to use it that way — will definitely start now.',
-      replies: [],
-    },
-  ],
-}
-
 function CommentsSection({ articleSlug }) {
-  const [comments, setComments] = useState(
-    () => SEED_COMMENTS[articleSlug] ?? []
-  )
-  const [name, setName]       = useState('')
-  const [text, setText]       = useState('')
-  const formRef               = useRef(null)
+  const [comments, setComments] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [name, setName]         = useState('')
+  const [text, setText]         = useState('')
+  const formRef                 = useRef(null)
 
-  // Сбрасываем при смене статьи
   useEffect(() => {
-    setComments(SEED_COMMENTS[articleSlug] ?? [])
+    setLoading(true)
+    fetchComments(articleSlug)
+      .then(setComments)
+      .catch(() => setComments([]))
+      .finally(() => setLoading(false))
   }, [articleSlug])
 
-  function formatToday() {
-    return new Date().toLocaleDateString('en-US', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    })
-  }
-
-  function addComment(e) {
+  async function addComment(e) {
     e.preventDefault()
     if (!text.trim()) return
-    setComments(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        name: name.trim() || 'Anonymous',
-        date: formatToday(),
-        text: text.trim(),
-        replies: [],
-      },
-    ])
-    setName('')
-    setText('')
+    try {
+      const c = await postComment(articleSlug, name.trim() || 'Anonymous', text.trim())
+      setComments(prev => [...prev, { ...c, replies: [] }])
+      setName('')
+      setText('')
+    } catch {}
   }
 
-  function addReply(commentId, reply) {
-    setComments(prev =>
-      prev.map(c =>
-        c.id === commentId
-          ? {
-              ...c,
-              replies: [
-                ...c.replies,
-                { id: Date.now(), ...reply, date: formatToday() },
-              ],
-            }
-          : c
+  async function addReply(commentId, reply) {
+    try {
+      const r = await postReply(commentId, reply.name, reply.text)
+      setComments(prev =>
+        prev.map(c => c.id === commentId ? { ...c, replies: [...c.replies, r] } : c)
       )
-    )
+    } catch {}
   }
 
   return (
@@ -203,7 +153,8 @@ function CommentsSection({ articleSlug }) {
         )}
       </h3>
 
-      {comments.length === 0 && (
+      {loading && <p className="comments-empty">Loading comments...</p>}
+      {!loading && comments.length === 0 && (
         <p className="comments-empty">No comments yet. Be the first!</p>
       )}
 
@@ -213,12 +164,7 @@ function CommentsSection({ articleSlug }) {
         ))}
       </div>
 
-      {/* Форма нового комментария */}
-      <form
-        ref={formRef}
-        className="comment-form"
-        onSubmit={addComment}
-      >
+      <form ref={formRef} className="comment-form" onSubmit={addComment}>
         <h4 className="comment-form__title">Leave a comment</h4>
         <input
           className="comment-form__input"
@@ -242,13 +188,6 @@ function CommentsSection({ articleSlug }) {
       </form>
     </div>
   )
-}
-
-// ── Главный компонент страницы ─────────────────────────────────
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  })
 }
 
 export default function ArticlePage() {

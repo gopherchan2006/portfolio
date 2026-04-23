@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gopherchan2006/portfolio-backend/internal/articles"
+	"github.com/gopherchan2006/portfolio-backend/internal/comments"
 	"github.com/gopherchan2006/portfolio-backend/internal/db"
 	"github.com/gopherchan2006/portfolio-backend/internal/httputil"
 )
@@ -33,7 +34,9 @@ func main() {
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 		httputil.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
-	articles.NewHandler(articles.NewStore(pool)).Register(mux)
+	articleStore := articles.NewStore(pool)
+	articles.NewHandler(articleStore).Register(mux)
+	comments.NewHandler(comments.NewStore(pool), articleStore).Register(mux)
 
 	port := os.Getenv("PORT")
 	if port == "" {
