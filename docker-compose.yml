@@ -21,6 +21,9 @@ services:
       DATABASE_URL: postgres://portfolio:portfolio@postgres:5432/portfolio?sslmode=disable
       MIGRATIONS_DIR: /app/migrations
       PORT: 8080
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
+      JWT_SECRET: supersecretkey
     ports:
       - "8080:8080"
     depends_on:

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gopherchan2006/portfolio-backend/internal/articles"
+	"github.com/gopherchan2006/portfolio-backend/internal/auth"
 	"github.com/gopherchan2006/portfolio-backend/internal/comments"
 	"github.com/gopherchan2006/portfolio-backend/internal/db"
 	"github.com/gopherchan2006/portfolio-backend/internal/httputil"
@@ -37,6 +38,7 @@ func main() {
 	articleStore := articles.NewStore(pool)
 	articles.NewHandler(articleStore).Register(mux)
 	comments.NewHandler(comments.NewStore(pool), articleStore).Register(mux)
+	auth.NewHandler().Register(mux)
 
 	port := os.Getenv("PORT")
 	if port == "" {
