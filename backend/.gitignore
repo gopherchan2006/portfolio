@@ -1,0 +1,9 @@
+# Backend binaries
+backend/bin/
+
+# Environment secrets
+backend/.env
+
+# OS
+.DS_Store
+Thumbs.db
