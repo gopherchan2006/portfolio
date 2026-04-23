@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 
+	"github.com/gopherchan2006/portfolio-backend/internal/articles"
 	"github.com/gopherchan2006/portfolio-backend/internal/db"
+	"github.com/gopherchan2006/portfolio-backend/internal/httputil"
 )
 
 func main() {
@@ -21,16 +20,20 @@ func main() {
 	}
 	defer pool.Close()
 
-	_, file, _, _ := runtime.Caller(0)
-	root := filepath.Join(filepath.Dir(file), "..", "..")
-	migrationsDir := filepath.Join(root, "migrations")
+	migrationsDir := os.Getenv("MIGRATIONS_DIR")
+	if migrationsDir == "" {
+		migrationsDir = "migrations"
+	}
 
 	if err := db.Migrate(ctx, pool, migrationsDir); err != nil {
 		log.Fatalf("db migrate: %v", err)
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/health", handleHealth)
+	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
+		httputil.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+	articles.NewHandler(articles.NewStore(pool)).Register(mux)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -41,10 +44,6 @@ func main() {
 	if err := http.ListenAndServe(":"+port, corsMiddleware(mux)); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -62,12 +61,4 @@ func corsMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Printf("writeJSON encode error: %v", err)
-	}
 }

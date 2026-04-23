@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getArticleBySlug } from '../data/articles'
+import { fetchArticle } from '../api'
 
 // ── Рендер блоков контента ─────────────────────────────────────
 function ContentBlock({ block }) {
@@ -252,15 +252,33 @@ function formatDate(iso) {
 }
 
 export default function ArticlePage() {
-  const { slug }   = useParams()
-  const navigate   = useNavigate()
-  const article    = getArticleBySlug(slug)
+  const { slug }                    = useParams()
+  const navigate                    = useNavigate()
+  const [article, setArticle]       = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [notFound, setNotFound]     = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    setNotFound(false)
+    fetchArticle(slug)
+      .then(data => {
+        if (!data) setNotFound(true)
+        else setArticle(data)
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false))
+  }, [slug])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [slug])
 
-  if (!article) {
+  if (loading) {
+    return <div className="ap-not-found"><p>Loading...</p></div>
+  }
+
+  if (notFound || !article) {
     return (
       <div className="ap-not-found">
         <p>Article not found.</p>
@@ -285,7 +303,7 @@ export default function ArticlePage() {
         </div>
         <h1 className="ap-header__title">{article.title}</h1>
         <div className="ap-header__meta">
-          <span>{formatDate(article.date)}</span>
+          <span>{formatDate(article.createdAt)}</span>
           <span className="ap-header__dot">·</span>
           <span>{article.readTime} read</span>
         </div>

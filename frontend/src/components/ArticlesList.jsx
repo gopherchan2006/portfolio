@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { articles } from '../data/articles'
+import { fetchArticles } from '../api'
 
 const ACCENT_COLORS = {
   cyan:   { tag: 'c', dot: 'var(--cyan)',   dimBorder: 'rgba(0,229,255,0.25)' },
@@ -15,6 +16,17 @@ function formatDate(iso) {
 }
 
 export default function ArticlesList() {
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
+
+  useEffect(() => {
+    fetchArticles()
+      .then(setArticles)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <div className="articles-page">
       <div className="articles-header">
@@ -26,6 +38,9 @@ export default function ArticlesList() {
           Notes on Go, databases, algorithms and frontend
         </p>
       </div>
+
+      {loading && <p className="articles-status">Loading...</p>}
+      {error   && <p className="articles-status articles-status--error">Failed to load articles.</p>}
 
       <div className="articles-grid">
         {articles.map(article => {
@@ -49,7 +64,7 @@ export default function ArticlesList() {
               <p className="article-card__summary">{article.summary}</p>
 
               <div className="article-card__footer">
-                <span className="article-card__date">{formatDate(article.date)}</span>
+                <span className="article-card__date">{formatDate(article.createdAt)}</span>
                 <span className="article-card__arrow">→</span>
               </div>
             </Link>
