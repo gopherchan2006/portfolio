@@ -1,15 +1,35 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
+
+	"github.com/gopherchan2006/portfolio-backend/internal/db"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	ctx := context.Background()
 
+	pool, err := db.Connect(ctx)
+	if err != nil {
+		log.Fatalf("db connect: %v", err)
+	}
+	defer pool.Close()
+
+	_, file, _, _ := runtime.Caller(0)
+	root := filepath.Join(filepath.Dir(file), "..", "..")
+	migrationsDir := filepath.Join(root, "migrations")
+
+	if err := db.Migrate(ctx, pool, migrationsDir); err != nil {
+		log.Fatalf("db migrate: %v", err)
+	}
+
+	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", handleHealth)
 
 	port := os.Getenv("PORT")
