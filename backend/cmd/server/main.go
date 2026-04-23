@@ -11,6 +11,7 @@ import (
 	"github.com/gopherchan2006/portfolio-backend/internal/comments"
 	"github.com/gopherchan2006/portfolio-backend/internal/db"
 	"github.com/gopherchan2006/portfolio-backend/internal/httputil"
+	"github.com/gopherchan2006/portfolio-backend/internal/media"
 )
 
 func main() {
@@ -35,11 +36,17 @@ func main() {
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 		httputil.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
+	storageDir := os.Getenv("STORAGE_DIR")
+	if storageDir == "" {
+		storageDir = "storage"
+	}
+
 	articleStore := articles.NewStore(pool)
 	articles.NewHandler(articleStore).Register(mux)
 	articles.NewAdminHandler(articleStore).Register(mux, auth.Middleware)
 	comments.NewHandler(comments.NewStore(pool), articleStore).Register(mux)
 	auth.NewHandler().Register(mux)
+	media.NewHandler(storageDir).Register(mux, auth.Middleware)
 
 	port := os.Getenv("PORT")
 	if port == "" {

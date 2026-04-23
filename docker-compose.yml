@@ -24,8 +24,11 @@ services:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: admin
       JWT_SECRET: supersecretkey
+      STORAGE_DIR: /app/storage
     ports:
       - "8080:8080"
+    volumes:
+      - storage:/app/storage
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,3 +47,4 @@ services:
 
 volumes:
   pgdata:
+  storage:
