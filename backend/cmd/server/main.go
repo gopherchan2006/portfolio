@@ -37,6 +37,7 @@ func main() {
 	})
 	articleStore := articles.NewStore(pool)
 	articles.NewHandler(articleStore).Register(mux)
+	articles.NewAdminHandler(articleStore).Register(mux, auth.Middleware)
 	comments.NewHandler(comments.NewStore(pool), articleStore).Register(mux)
 	auth.NewHandler().Register(mux)
 
