@@ -72,7 +72,10 @@ func registerFrontend(mux *http.ServeMux) {
 	indexPath := filepath.Join(staticDir, "index.html")
 	if _, err := os.Stat(indexPath); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			log.Printf("статический фронтенд не найден в %s, маршруты статики пропущены", staticDir)
+			log.Printf("статический фронтенд не найден в %s, отдаем корневой health-ответ", staticDir)
+			mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+				httputil.WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+			})
 			return
 		}
 		log.Printf("ошибка проверки директории статики: %v", err)
