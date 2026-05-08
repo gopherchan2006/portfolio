@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gopherchan2006/portfolio-backend/internal/articles"
 	"github.com/gopherchan2006/portfolio-backend/internal/auth"
@@ -47,6 +50,7 @@ func main() {
 	comments.NewHandler(comments.NewStore(pool), articleStore).Register(mux)
 	auth.NewHandler().Register(mux)
 	media.NewHandler(storageDir).Register(mux, auth.Middleware)
+	registerFrontend(mux)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -57,6 +61,35 @@ func main() {
 	if err := http.ListenAndServe(":"+port, corsMiddleware(mux)); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
+}
+
+func registerFrontend(mux *http.ServeMux) {
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		staticDir = "static"
+	}
+
+	indexPath := filepath.Join(staticDir, "index.html")
+	if _, err := os.Stat(indexPath); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			log.Printf("статический фронтенд не найден в %s, маршруты статики пропущены", staticDir)
+			return
+		}
+		log.Printf("ошибка проверки директории статики: %v", err)
+		return
+	}
+
+	files := http.FileServer(http.Dir(staticDir))
+	mux.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		relPath := strings.TrimPrefix(filepath.Clean(r.URL.Path), "/")
+		path := filepath.Join(staticDir, relPath)
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			files.ServeHTTP(w, r)
+			return
+		}
+
+		http.ServeFile(w, r, indexPath)
+	}))
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
